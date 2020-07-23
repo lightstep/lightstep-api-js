@@ -1,0 +1,27 @@
+{
+  "name": "lightstep-js-sdk",
+  "version": "0.0.1",
+  "description": "Javascript SDK for the public Lighstep API",
+  "main": "src/index.js",
+  "dependencies": {
+    "swagger-client": "^3.10.12"
+  },
+  "devDependencies": {
+    "eslint": "^7.5.0",
+    "jest": "^26.1.0"
+  },
+  "scripts": {
+    "test": "npm run lint",
+    "lint": "eslint src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lightstep/lightstep-js-sdk.git"
+  },
+  "author": "Lighstep, Inc.",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lightstep/lightstep-js-sdk/issues"
+  },
+  "homepage": "https://github.com/lightstep/lightstep-js-sdk#readme"
+}

@@ -19,9 +19,11 @@
     "func-names": [0],
     "guard-for-in": [0],
     "indent": [2, 4],
+    "semi": ["error", "never"],
     "key-spacing": [2, { "align": "colon", "beforeColon": true, "afterColon": true }],
     "max-len": [2, 120, 4],
     "new-cap": [0],
+    "no-trailing-spaces": "error",
     "no-continue": [0],
     "no-param-reassign": [0],
     "no-multi-spaces": [2, { "exceptions": {

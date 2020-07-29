@@ -1,6 +1,6 @@
 {
   "name": "lightstep-js-sdk",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Javascript SDK for the public Lighstep API",
   "main": "src/index.js",
   "dependencies": {
@@ -11,7 +11,8 @@
     "jest": "^26.1.0"
   },
   "scripts": {
-    "test": "npm run lint",
+    "test": "./node_modules/.bin/jest",
+    "e2e": "./node_modules/.bin/jest --testRegex='./e2e/e2e.js'",
     "lint": "eslint src"
   },
   "repository": {

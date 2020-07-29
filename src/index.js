@@ -1,4 +1,4 @@
-const Swagger = require('swagger-client');
+const Swagger = require('swagger-client')
 
 /**
 * This class provides methods to call the Lightstep Public APs.
@@ -28,7 +28,29 @@ class LightstepAPI {
         this.sdk = (await swagger)
         this.orgId = orgId
         this.apiKey = apiKey
+
+        this._initConvenienceFunctions()
         return this
+    }
+
+    _initConvenienceFunctions() {
+        const shortcuts = {
+            listProjects   : this.sdk.apis.Projects.listProjectsID,
+            listServices   : this.sdk.apis.Services.listServicesID,
+            listStreams    : this.sdk.apis.Streams.listStreamsID,
+            timeseries     : this.sdk.apis.Streams.timeseriesID,
+            storedTraces   : this.sdk.apis.Traces.storedTracesID,
+            createSnapshot : this.sdk.apis.Snapshots.createSnapshot,
+        }
+
+        for (const s in shortcuts) {
+            this[s] = (opts = {}) => {
+                if(!opts.organization) {
+                    opts.organization = this.orgId
+                }
+                return shortcuts[s].apply(this, [opts])
+            }
+        }
     }
 
     _setHeaders (req, coreAPIInstance) {

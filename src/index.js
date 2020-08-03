@@ -28,7 +28,6 @@ class LightstepAPI {
         this.sdk = (await swagger)
         this.orgId = orgId
         this.apiKey = apiKey
-
         this._initConvenienceFunctions()
         return this
     }
@@ -61,6 +60,34 @@ class LightstepAPI {
             req.headers['Content-Type'] = 'application/json'
         }
     }
+
+    /**
+     * Returns an exemplar trace from a stream.
+     * @param streamId {string} Lightstep stream id
+     * @param projectId {string} Lightstep project id
+     * @returns {Promise<LightstepAPI>}
+     */
+    async traceFromStream(streamId, projectId, {
+        windowStartMs = Date.now() - (60000 * 10), // 10 minutes ago
+        resolutionMs = 60000, // 1 minute
+        windowSizeMs = 60000 * 15, // 15 minutes
+    } = {}) {
+        const timeseries = await this.timeseries(
+            {
+                project             : projectId,
+                'include-exemplars' : 1,
+                'resolution-ms'     : resolutionMs,
+                'stream-id'         : streamId,
+                'youngest-time'     : (new Date(windowStartMs)).toISOString(),
+                'oldest-time'       : (new Date(windowStartMs - windowSizeMs)).toISOString(),
+            }
+        )
+        if (!timeseries.body.data.attributes.exemplars) {
+            return null
+        }
+        const trace = timeseries.body.data.attributes.exemplars[0]
+        return await this.storedTraces({ project : projectId, 'span-id' : trace.trace_handle })
+    }
 }
 
 /**
@@ -68,7 +95,7 @@ class LightstepAPI {
 *
 * @param orgId {string} Lightstep organization id
 * @param apiKey {string} Your api key
-* @returns {Promise<LighstepAPI>}
+* @returns {Promise<LightstepAPI>}
 */
 function init(orgId, apiKey) {
     return new Promise((resolve, reject) => {

@@ -18,8 +18,9 @@ class LightstepAPI {
         const swagger = new Swagger({
             spec               : spec,
             requestInterceptor : req => {
-                if (process.env.LIGHTSTEP_API_HOST) {
-                    req.url = req.url.replace('api.lightstep.com', process.env.LIGHTSTEP_API_HOST)
+                if (process.env.LIGHTSTEP_HOST || process.env.LIGHTSTEP_API_HOST) {
+                    req.url = req.url.replace('api.lightstep.com',
+                        process.env.LIGHTSTEP_HOST || process.env.LIGHTSTEP_API_HOST)
                 }
                 this._setHeaders(req, this)
             },
@@ -71,21 +72,21 @@ class LightstepAPI {
         windowStartMs = Date.now() - (60000 * 10), // 10 minutes ago
         resolutionMs = 60000, // 1 minute
         windowSizeMs = 60000 * 15, // 15 minutes
+        exemplarSelector = e => true // returns first exemplar in stream
     } = {}) {
-        const timeseries = await this.timeseries(
-            {
-                project             : projectId,
-                'include-exemplars' : 1,
-                'resolution-ms'     : resolutionMs,
-                'stream-id'         : streamId,
-                'youngest-time'     : (new Date(windowStartMs)).toISOString(),
-                'oldest-time'       : (new Date(windowStartMs - windowSizeMs)).toISOString(),
-            }
-        )
+        const timeseriesOpts = {
+            project             : projectId,
+            'include-exemplars' : 1,
+            'resolution-ms'     : resolutionMs,
+            'stream-id'         : streamId,
+            'youngest-time'     : (new Date(windowStartMs)).toISOString(),
+            'oldest-time'       : (new Date(windowStartMs - windowSizeMs)).toISOString(),
+        }
+        const timeseries = await this.timeseries(timeseriesOpts)
         if (!timeseries.body.data.attributes.exemplars) {
             return null
         }
-        const trace = timeseries.body.data.attributes.exemplars[0]
+        const trace = timeseries.body.data.attributes.exemplars.find(exemplarSelector)
         return await this.storedTraces({ project : projectId, 'span-id' : trace.trace_handle })
     }
 }

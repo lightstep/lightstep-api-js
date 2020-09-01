@@ -631,6 +631,197 @@
         }
       }
     },
+    "/{organization}/projects/{project}/destinations": {
+      "get": {
+        "description": "Returns information about all destinations in a project. Include the organization and project in the path parameter.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Destinations"
+        ],
+        "summary": "List Destinations",
+        "operationId": "listDestinations",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Name of the customer organization",
+            "name": "organization",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Name of the customer project",
+            "name": "project",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "JSON-formatted data about the given destination"
+          },
+          "401": {
+            "description": "The API key does not provide access to this resource (such as a project or organization)"
+          },
+          "404": {
+            "description": "Project name is not found"
+          },
+          "500": {
+            "description": "Internal service error (retryable)"
+          }
+        }
+      },
+      "post": {
+        "description": "Creates a new destination. Note: To create a Slack destination, you must first [enable a Slack workspace integration](https://docs.lightstep.com/docs/create-and-manage-destinations#add-a-slack-workspace-integration) in the General Settings page. To create a PagerDuty destination, you must provide a [PagerDuty integration key](https://support.pagerduty.com/docs/services-and-integrations).",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Destinations"
+        ],
+        "summary": "Create Destination",
+        "operationId": "postDestinationID",
+        "parameters": [
+          {
+            "description": "Destination definition",
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/destinationRequestBodyExample"
+            }
+          },
+          {
+            "type": "string",
+            "description": "Name of the customer organization",
+            "name": "organization",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Name of the customer project",
+            "name": "project",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The destination was created successfully"
+          },
+          "401": {
+            "description": "The API key does not provide access to this resource (such as a project or organization)"
+          },
+          "404": {
+            "description": "Project name is not found"
+          },
+          "500": {
+            "description": "Internal service error (retryable)"
+          }
+        }
+      }
+    },
+    "/{organization}/projects/{project}/destinations/{destination-id}": {
+      "get": {
+        "description": "Returns information about a specific destination. Include the organization, project, and destination identifier in the path parameter.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Destinations"
+        ],
+        "summary": "Get Destination",
+        "operationId": "getDestinationID",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Name of the customer organization",
+            "name": "organization",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Name of the customer project",
+            "name": "project",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Destination identifier",
+            "name": "destination-id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "JSON-formatted data about the given destination"
+          },
+          "401": {
+            "description": "The API key does not provide access to this resource (such as a project or organization)"
+          },
+          "404": {
+            "description": "Project name is not found or destination identifier is not found"
+          },
+          "500": {
+            "description": "Internal service error (retryable)"
+          }
+        }
+      },
+      "delete": {
+        "description": "Deletes an existing destination",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Destinations"
+        ],
+        "summary": "Delete Destination",
+        "operationId": "deleteDestinationID",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Name of the customer organization",
+            "name": "organization",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Name of the customer project",
+            "name": "project",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Identifier of the destination to delete",
+            "name": "destination-id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The destination was successfully deleted"
+          },
+          "401": {
+            "description": "The API Key does not provide access to this resource"
+          },
+          "404": {
+            "description": "Project name or destination ID is not found"
+          },
+          "500": {
+            "description": "Internal service error (retryable)"
+          }
+        }
+      }
+    },
     "/{organization}/projects/{project}/directory/services": {
       "get": {
         "description": "Returns all reporting services for a project",
@@ -1775,6 +1966,62 @@
       },
       "x-go-package": "github.com/lightstep/crouton/service/api/public/v02/handlers"
     },
+    "destinationRequestBodyExample": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "attributes": {
+              "type": "object",
+              "properties": {
+                "channel": {
+                  "description": "Required parameter for Slack only",
+                  "type": "string",
+                  "x-go-name": "Channel"
+                },
+                "custom_headers": {
+                  "description": "Optional parameter for Webhook only",
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "x-go-name": "CustomHeaders"
+                },
+                "destination_type": {
+                  "description": "Required parameter. Can be one of: `\"slack\"`, `\"pagerduty\"`, and `\"webhook\"`.",
+                  "type": "string",
+                  "x-go-name": "DestinationType"
+                },
+                "integration_key": {
+                  "description": "Required parameter for PagerDuty only",
+                  "type": "string",
+                  "x-go-name": "IntegrationKey"
+                },
+                "name": {
+                  "description": "Required parameter",
+                  "type": "string",
+                  "x-go-name": "Name"
+                },
+                "url": {
+                  "description": "Required parameter for Webhook only",
+                  "type": "string",
+                  "x-go-name": "URL"
+                }
+              },
+              "x-go-name": "Attributes"
+            },
+            "type": {
+              "description": "`Type` should be `\"destination\"`",
+              "type": "string",
+              "x-go-name": "Type"
+            }
+          },
+          "x-go-name": "Data"
+        }
+      },
+      "x-go-package": "github.com/lightstep/crouton/service/api/public/v02/handlers"
+    },
     "externalLinkAttributes": {
       "type": "object",
       "properties": {
@@ -1893,6 +2140,12 @@
             "type": "object"
           },
           "x-go-name": "CustomData"
+        },
+        "data-last-received-time": {
+          "description": "Date+time stream was last updated",
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "DataLastReceivedTime"
         },
         "name": {
           "description": "Name for the stream (free-form string)",

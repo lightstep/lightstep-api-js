@@ -4,6 +4,7 @@
   "description": "Javascript SDK for the public Lighstep API",
   "main": "src/index.js",
   "dependencies": {
+    "node-fetch": "^2.6.1",
     "swagger-client": "^3.10.12"
   },
   "devDependencies": {

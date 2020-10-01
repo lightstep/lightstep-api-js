@@ -17,7 +17,7 @@ Additional examples are in the `examples/` directory.
 
 ```js
     // using auto-generated swagger function
-    await projects = sdkClient.sdk.apis.Projects.listProjectsID({ origanization: 'my-org-id' })
+    await projects = sdkClient.sdk.apis.Projects.listProjectsID({ organization: 'my-org-id' })
 
     // using convenience function (automatically sets org id)
     await projects = sdkClient.listProjects()

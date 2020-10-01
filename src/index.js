@@ -1,4 +1,5 @@
 const Swagger = require('swagger-client')
+const VERSION = require('../package.json').version
 
 /**
 * This class provides methods to call the Lightstep Public APs.
@@ -57,6 +58,9 @@ class LightstepAPI {
         if (!req.headers.Authorization) {
             req.headers.Authorization = 'Bearer ' + coreAPIInstance.apiKey
         }
+        if (!req.headers['User-Agent']) {
+            req.headers['User-Agent'] = `lightstep-js-sdk ${VERSION}`
+        }
         if (!req.headers['Content-Type']) {
             req.headers['Content-Type'] = 'application/json'
         }
@@ -114,14 +118,15 @@ class LightstepAPI {
     */
     findServiceRelationships(tree) {
         let relationships = {}
-
+        let duration = {}
         const traverse = (tree, parent) => {
-            parent = (parent && parent.reporter.attributes['lightstep.component_name']) || 'ROOT'
-            var current = tree.reporter.attributes['lightstep.component_name']
+            var parentName = (parent && parent.reporter.attributes['lightstep.component_name']) || 'ROOT'
+            var currentName = tree.reporter.attributes['lightstep.component_name']
 
-            relationships[parent] = (relationships[parent] || [])
-            if (!relationships[parent].includes(current) && parent !== current) {
-                relationships[parent].push(current)
+            relationships[parentName] = (relationships[parentName] || [])
+            if (!relationships[parentName].includes(currentName) && parentName !== currentName) {
+                duration[`${parentName}->${currentName}`] = (tree['end-time-micros'] - tree['start-time-micros'])
+                relationships[parentName].push(currentName)
             }
 
             if (tree.childSpans.length > 0) {
@@ -132,7 +137,7 @@ class LightstepAPI {
         }
 
         traverse(tree)
-        return relationships
+        return {relationships, duration}
     }
 
     /**

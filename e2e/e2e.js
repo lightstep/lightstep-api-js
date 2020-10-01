@@ -4,7 +4,7 @@ beforeAll(async () => {
     jest.setTimeout(240000)
 })
 
-const orgId = process.env.LIGHTSTEP_ORG
+const orgId = process.env.LIGHTSTEP_ORGANIZATION
 const apiKey = process.env.LIGHTSTEP_API_KEY
 
 var sdkClient = {}

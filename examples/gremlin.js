@@ -56,31 +56,39 @@ async function run() {
     const streams = await sdkClient.listStreams({ project : process.env.LIGHTSTEP_PROJECT })
 
     // Select the first stream returned and get a trace
-    console.log(`Using trace from stream: ${streams.body.data[0].id} `)
-    const trace = await sdkClient.traceFromStream( streams.body.data[0].id, process.env.LIGHTSTEP_PROJECT)
+    const streamId = streams.body.data[0].id
+    console.log(`Using trace from stream: ${streamId} `)
+    const trace = await sdkClient.traceFromStream( streamId, process.env.LIGHTSTEP_PROJECT)
     if (trace === null) {
-        console.error('Found no exemplar traces in stream.')
+        console.error(`Found no exemplar traces in stream ${streamId}`)
         return
     }
 
-    // Use this if you have a specific trace in mind:
-    // const trace =  await sdkClient.storedTraces({ project : process.env.LIGHTSTEP_PROJECT, 'span-id' : 'trace_id' })
+    // Use this instead  if you have a specific trace in mind:
+    // const trace =  await sdkClient.storedTraces({
+    //    project : process.env.LIGHTSTEP_PROJECT, 'span-id' : process.env.LIGHTSTEP_TRACE_ID })
 
-    console.log(streams.body.data)
+    const traceId = trace.body.data[0].id
+
     const spans = trace.body.data[0].attributes.spans
     const reporters = trace.body.data[0].relationships.reporters
     const tree = sdkClient.createSpanTree(spans, reporters)
 
-    const relationships = sdkClient.findServiceRelationships(tree)
+    const { relationships, duration } = sdkClient.findServiceRelationships(tree)
     console.log(`Service relationships from Lightstep trace ${trace.body.data[0].id}:`)
     console.log(relationships)
+    console.log(duration)
 
     console.log('\n')
 
     console.log('Creating Gremlin latency attacks from trace for service frontend...')
     for (var downstream of relationships.frontend) {
-        console.log(`  creating latency attack for service`, `${downstream}...`)
-        //const attackId = await createGremlinLatencyAttack(downstream, { traceId : trace.body.data[0].id })
+        const latencyx10 = duration[`frontend->${downstream}`] * 10
+        console.log(`  creating latency attack for service ${downstream} with latency ${latencyx10}ms...`)
+        const attackId = await createGremlinLatencyAttack(downstream, {
+            traceId   : traceId,
+            latencyMs : latencyx10
+        })
         console.log(`  created attack ${attackId} !`)
     }
 }

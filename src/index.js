@@ -1,4 +1,5 @@
 const Swagger = require('swagger-client')
+const VERSION = require('../package.json').version
 
 /**
 * This class provides methods to call the Lightstep Public APs.
@@ -57,9 +58,86 @@ class LightstepAPI {
         if (!req.headers.Authorization) {
             req.headers.Authorization = 'Bearer ' + coreAPIInstance.apiKey
         }
+        if (!req.headers['User-Agent']) {
+            req.headers['User-Agent'] = `lightstep-js-sdk ${VERSION}`
+        }
         if (!req.headers['Content-Type']) {
             req.headers['Content-Type'] = 'application/json'
         }
+    }
+
+    /**
+     * Converts an array of spans to a nested span tree with inline reporter metadata.
+     *
+     * @param {Object} spans
+     * @param {Object} reporters
+     */
+    createSpanTree(spans, reporters) {
+        let spanTable = {}
+
+        // creates table of all reporters
+        let reporterTable = {}
+        reporters.forEach( reporter => reporterTable[reporter['reporter-id']] = { ... reporter })
+        spans.forEach( span => spanTable[span['span-id']] =
+        { ...span, reporter : reporterTable[span['reporter-id']], childSpans : [] } )
+
+        // creates tree of span relationships
+        let dataTree = []
+        spans.forEach(span => {
+            if (span.tags.parent_span_guid) {
+                spanTable[span.tags.parent_span_guid].childSpans.push(spanTable[span['span-id']])
+            } else {
+                dataTree.push(spanTable[span['span-id']])
+            }
+        })
+        // assumption: all traces have a single root
+        return dataTree[0]
+    }
+
+    /**
+    * Finds service-to-service relationships from a collection of spans in a tree.
+    *
+    * Example output (from a single trace):
+    *
+    * ```
+    * {
+    *   ROOT: [ 'frontend' ],
+    *   frontend: [
+    *     'productcatalogservice',
+    *     'currencyservice',
+    *     'cartservice',
+    *     'recommendationservice'
+    *   ],
+    *   currencyservice: [],
+    *   cartservice: [],
+    *   recommendationservice: [ 'productcatalogservice' ]
+    * }
+    * ```
+    *
+    * @param {Object} tree
+    */
+    findServiceRelationships(tree) {
+        let relationships = {}
+        let duration = {}
+        const traverse = (tree, parent) => {
+            var parentName = (parent && parent.reporter.attributes['lightstep.component_name']) || 'ROOT'
+            var currentName = tree.reporter.attributes['lightstep.component_name']
+
+            relationships[parentName] = (relationships[parentName] || [])
+            if (!relationships[parentName].includes(currentName) && parentName !== currentName) {
+                duration[`${parentName}->${currentName}`] = (tree['end-time-micros'] - tree['start-time-micros'])
+                relationships[parentName].push(currentName)
+            }
+
+            if (tree.childSpans.length > 0) {
+                tree.childSpans.forEach(cs => {
+                    traverse(cs, tree)
+                })
+            }
+        }
+
+        traverse(tree)
+        return {relationships, duration}
     }
 
     /**

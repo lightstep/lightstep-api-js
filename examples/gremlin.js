@@ -1,8 +1,16 @@
 const sdk = require('../src')
 const fetch = require('node-fetch')
 
+// This script automatically generates Gremlin latency attacks
+// from a Lightstep trace.
+//
+// The targeted services are assumed to be running in a container
+// with the label app=[service name]
+
+// to run on the command line: node gremlin.js
+
 /**
- * Creates a Gremlin latenecy attack targeting a container
+ * Creates a Gremlin latency attack targeting a container
  * with label app=service_name
  *
  * @param {string} targetAppLabel

@@ -12,29 +12,62 @@ yargs.command('projects', 'get projects', () => {}, async (argv) => {
     }
     return Promise.resolve()
 })
-yargs.command('services', 'get services', () => {}, async (argv) => {
+
+yargs.command('services', 'get services', (yargs) => {
+    yargs
+        .positional('project', {
+            describe : 'Lightstep project id',
+            required : true,
+            default  : process.env.LIGHTSTEP_PROJECT
+        })
+}, async (argv) => {
     const sdkClient = await sdk.init(argv.lightstepOrganization,
         argv.lightstepApiKey)
-    const services = await sdkClient.listServices({ project : argv.lightstepProject })
+
+    const services = await sdkClient.listServices({ project : argv.project })
     for (const service of services.body.data.items) {
         console.log(`${service.attributes.name}`)
     }
     return Promise.resolve()
 })
-    .option('lightstep-api-key', {
-        type        : 'string',
-        required    : true,
-        description : 'Lightstep API key',
-        default     : process.env.LIGHTSTEP_API_KEY
-    })
-    .option('lightstep-organization', {
-        type        : 'string',
-        required    : true,
-        description : 'Lightstep organization id',
-        default     : process.env.LIGHTSTEP_ORGANIZATION
-    })
-    .option('lightstep-project', {
-        type        : 'string',
-        description : 'Lightstep project id'
-    })
-    .argv
+
+yargs.command('streams [stream-id]', 'get streams', (yargs) => {
+    yargs
+        .positional('project', {
+            describe : 'Lightstep project id',
+            required : true,
+            default  : process.env.LIGHTSTEP_PROJECT
+        })
+}, async (argv) => {
+    const sdkClient = await sdk.init(argv.lightstepOrganization,
+        argv.lightstepApiKey)
+    if (argv.streamId) {
+        const streamResp = await sdkClient.getStream(
+            { project : argv.project, 'stream-id' : argv.streamId })
+        const stream = streamResp.body.data
+        console.log(`${stream.id}\t${stream.attributes.name}\t${stream.attributes.query}`)
+        return Promise.resolve()
+    } else {
+        const streams = await sdkClient.listStreams({ project : argv.project })
+        for (const stream of streams.body.data) {
+            console.log(`${stream.id}\t${stream.attributes.name}\t${stream.attributes.query}`)
+        }
+        return Promise.resolve()
+    }
+})
+
+yargs.option('lightstep-api-key', {
+    type        : 'string',
+    required    : true,
+    description : 'Lightstep API key',
+    default     : process.env.LIGHTSTEP_API_KEY
+})
+
+yargs.option('lightstep-organization', {
+    type        : 'string',
+    required    : true,
+    description : 'Lightstep organization id',
+    default     : process.env.LIGHTSTEP_ORGANIZATION
+})
+
+yargs.argv

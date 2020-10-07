@@ -1,5 +1,7 @@
+/* eslint-disable no-console */
+
 const sdk = require('../src')
-const fetch = require('node-fetch')
+const { createGremlinLatencyAttack } = require('../src/gremlin')
 
 // This script automatically generates Gremlin latency attacks
 // from a Lightstep trace.
@@ -8,54 +10,6 @@ const fetch = require('node-fetch')
 // with the label app=[service name]
 
 // to run on the command line: node gremlin.js
-
-/**
- * Creates a Gremlin latency attack targeting a container
- * with label app=service_name
- *
- * @param {string} targetAppLabel
- */
-const createGremlinLatencyAttack = async(targetAppLabel, { duration = 60, latencyMs = 2000, traceId = '' }) => {
-    const attack = {
-        "command" : {
-            "type" : "latency",
-            "args" : [
-                "latency",
-                "-l",
-                `${duration}`,
-                "-m",
-                `${latencyMs}`,
-                "-h",
-                "^api.gremlin.com,^ingest.staging.lightstep.com,^ingest.lightstep.com",
-                "-p",
-                "^53"
-            ]
-        },
-        "annotations" : {
-            "lightstep.created_from_trace_id" : `${traceId}`
-        },
-        "target" : {
-            "containers" : {
-                "labels" : {
-                    "app" : targetAppLabel
-                }
-            },
-            "type" : "Random"
-        }
-    }
-    const response = await fetch('https://api.gremlin.com/v1/attacks/new', {
-        method  : 'POST',
-        headers : {
-            "Content-Type"  : "application/json",
-            "Authorization" : `Key ${process.env.GREMLIN_API_KEY}`,
-        },
-        body : JSON.stringify(attack) } )
-    const text = await response.text()
-    if (response.status !== 201) {
-        throw new Error(`HTTP Error ${response.status}: ${text}`)
-    }
-    return text
-}
 
 async function run() {
     const sdkClient = await sdk.init(

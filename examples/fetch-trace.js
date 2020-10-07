@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 
 const sdk = require('../src')
 
@@ -11,7 +12,7 @@ async function run() {
     const streams = await sdkClient.listStreams({ project : projectId })
     const streamId = streams.body.data[0].id
     const storedTrace = await sdkClient.traceFromStream(streamId, projectId)
-    console.dir(storedTrace)
+    console.log(storedTrace)
 }
 
 run()

@@ -11,7 +11,25 @@ Javascript SDK for the Lightstep Public API.
     const sdkClient = await sdk.init(orgId, apiKey)
 ```
 
-### examples
+### cli examples
+
+There is a convenience CLI available for interacting with the API.
+
+```sh
+    # Get services for a project
+    $ lightstep services --project dev-foo
+
+    # Get streams for a service in a project
+    $ lightstep streams --service frontend --project dev-foo
+
+    # Get timeseries for a stream
+    $ lightstep timeseries --project dev-foo --streamId jT1VWPSc
+
+    # Generate a Gremlin chaos attack from a trace for service frontend
+    $ gremlin --project dev-foo --trace-id $TRACE_ID frontend
+```
+
+### code examples
 
 Additional examples are in the `examples/` directory.
 

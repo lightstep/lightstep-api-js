@@ -39,6 +39,7 @@ class LightstepAPI {
             listProjects   : this.sdk.apis.Projects.listProjectsID,
             listServices   : this.sdk.apis.Services.listServicesID,
             listStreams    : this.sdk.apis.Streams.listStreamsID,
+            getStream      : this.sdk.apis.Streams.getStreamID,
             timeseries     : this.sdk.apis.Streams.timeseriesID,
             storedTraces   : this.sdk.apis.Traces.storedTracesID,
             createSnapshot : this.sdk.apis.Snapshots.createSnapshot,

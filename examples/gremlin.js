@@ -6,6 +6,10 @@ const { createGremlinLatencyAttack } = require('../src/gremlin')
 // This script automatically generates Gremlin latency attacks
 // from a Lightstep trace.
 //
+// This is implemented as a CLI command in this repository, see:
+//
+// $ lightstep gremlin --project dev-foo --span-id $SPAN_ID frontend
+//
 // The targeted services are assumed to be running in a container
 // with the label app=[service name]
 

@@ -110,6 +110,29 @@ yargs.command('streams [stream-id]', 'get streams', (yargs) => {
     }
 })
 
+yargs.command('snapshot <query>', 'take a snapshot for a query', (yargs) => {
+    yargs
+        .positional('project', {
+            describe : 'Lightstep project id',
+            required : true,
+            type     : 'string',
+            default  : process.env.LIGHTSTEP_PROJECT
+        })
+}, async (argv) => {
+    const sdkClient = await sdk.init(argv.lightstepOrganization,
+        argv.lightstepApiKey)
+    const snapshot = await sdkClient.createSnapshot({ project : argv.project, data    : {
+        data : {
+            attributes : {
+                query : argv.query
+            }
+        }
+    } })
+
+    console.log(snapshot.body.data.id)
+    return Promise.resolve()
+})
+
 yargs.command('gremlin <service>', 'generate gremlin attack from trace targeting a service', (yargs) => {
     yargs
         .option('gremlin-api-key', {
@@ -124,8 +147,8 @@ yargs.command('gremlin <service>', 'generate gremlin attack from trace targeting
             required : true,
             default  : process.env.LIGHTSTEP_PROJECT
         })
-        .option('trace-id', {
-            describe : 'Lightstep trace to generate attacks from',
+        .option('span-id', {
+            describe : 'Lightstep span to generate attacks from',
             type     : 'string',
             required : true
         })
@@ -139,7 +162,7 @@ yargs.command('gremlin <service>', 'generate gremlin attack from trace targeting
     const sdkClient = await sdk.init(argv.lightstepOrganization,
         argv.lightstepApiKey)
     const trace =  await sdkClient.storedTraces({
-        project : argv.project, 'span-id' : argv.traceId })
+        project : argv.project, 'span-id' : argv.spanId })
     const traceId = trace.body.data[0].id
     const spans = trace.body.data[0].attributes.spans
     const reporters = trace.body.data[0].relationships.reporters

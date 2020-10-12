@@ -28,8 +28,8 @@ There is a convenience CLI available for interacting with the API.
     # Take a snapshot for a given query
     $ lightstep snapshot --project dev-foo 'service in ("frontend")'
 
-    # Generate a Gremlin chaos attack from a trace for service frontend
-    $ lightstep gremlin --project dev-foo --trace-id $TRACE_ID frontend
+    # Generate a Gremlin chaos attack from a span for service named frontend
+    $ lightstep gremlin --project dev-foo --span-id $SPAN_ID frontend
 ```
 
 ### code examples

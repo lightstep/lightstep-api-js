@@ -110,6 +110,29 @@ yargs.command('streams [stream-id]', 'get streams', (yargs) => {
     }
 })
 
+yargs.command('snapshot <query>', 'take a snapshot for a query', (yargs) => {
+    yargs
+        .positional('project', {
+            describe : 'Lightstep project id',
+            required : true,
+            type     : 'string',
+            default  : process.env.LIGHTSTEP_PROJECT
+        })
+}, async (argv) => {
+    const sdkClient = await sdk.init(argv.lightstepOrganization,
+        argv.lightstepApiKey)
+    const snapshot = await sdkClient.createSnapshot({ project : argv.project, data    : {
+        data : {
+            attributes : {
+                query : argv.query
+            }
+        }
+    } })
+
+    console.log(snapshot.body.data.id)
+    return Promise.resolve()
+})
+
 yargs.command('gremlin <service>', 'generate gremlin attack from trace targeting a service', (yargs) => {
     yargs
         .option('gremlin-api-key', {

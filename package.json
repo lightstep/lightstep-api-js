@@ -1,9 +1,10 @@
 {
   "name": "lightstep-js-sdk",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Javascript SDK for the public Lighstep API",
   "main": "src/index.js",
   "dependencies": {
+    "graphviz": "0.0.9",
     "node-fetch": "^2.6.1",
     "swagger-client": "^3.10.12",
     "yargs": "^16.0.3"

@@ -1,5 +1,7 @@
 const Swagger = require('swagger-client')
 const VERSION = require('../package.json').version
+const fetch = require('node-fetch')
+const graphviz = require('graphviz')
 
 /**
 * This class provides methods to call the Lightstep Public APs.
@@ -32,6 +34,18 @@ class LightstepAPI {
         this.apiKey = apiKey
         this._initConvenienceFunctions()
         return this
+    }
+
+    basePath() {
+        return require('./api-swagger.json').basePath
+    }
+
+    defaultHostname() {
+        return require('./api-swagger.json').host
+    }
+
+    getApiHostname() {
+        return process.env.LIGHTSTEP_HOST || process.env.LIGHTSTEP_API_HOST || this.defaultHostname
     }
 
     _initConvenienceFunctions() {
@@ -167,6 +181,63 @@ class LightstepAPI {
         }
         const trace = timeseries.body.data.attributes.exemplars.find(exemplarSelector)
         return await this.storedTraces({ project : projectId, 'span-id' : trace.trace_handle })
+    }
+
+    /**
+     * Returns a snapshot from the API
+     */
+    async getSnapshot({project, snapshotId}) {
+        // eslint-disable-next-line max-len
+        const url = `https://${this.getApiHostname()}${this.basePath()}/${this.orgId}/projects/${project}/snapshots/${snapshotId}`
+        const response = await fetch(url, {
+            method  : 'GET',
+            headers : {
+                "Content-Type"  : "application/json",
+                "Authorization" : `Bearer ${this.apiKey}`,
+            }
+        } )
+        if (response.status !== 200) {
+            const text = await response.text()
+            throw new Error(`HTTP Error ${response.status}: ${text}`)
+        }
+        return await response.json()
+    }
+
+    /**
+     * Returns a service diagram from a snapshot id from the API
+     */
+    async getServiceDiagram({project, snapshotId}) {
+        // eslint-disable-next-line max-len
+        const url = `https://${this.getApiHostname()}${this.basePath()}/${this.orgId}/projects/${project}/snapshots/${snapshotId}/service-diagram`
+        const response = await fetch(url, {
+            method  : 'GET',
+            headers : {
+                "Content-Type"  : "application/json",
+                "Authorization" : `Bearer ${this.apiKey}`,
+            }
+        } )
+        if (response.status !== 200 && response.status !== 202) {
+            const text = await response.text()
+            throw new Error(`HTTP Error ${response.status}: ${text}`)
+        }
+        return await response.json()
+    }
+
+    /**
+     * Converts a Lightstep service diagram to dotviz format
+     */
+    diagramToGraphviz(diagramJson) {
+        var g = graphviz.digraph('LS')
+        const nodes = diagramJson.data.attributes['service-diagram'].nodes
+
+        for (var n in nodes) {
+            g.addNode(nodes[n].service_name)
+        }
+        const edges = diagramJson.data.attributes['service-diagram'].edges
+        for (var e in edges) {
+            g.addEdge(edges[e].from, edges[e].to)
+        }
+        return g.to_dot()
     }
 }
 

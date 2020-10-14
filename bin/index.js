@@ -160,15 +160,27 @@ yargs.command('service-diagram <snapshot-id>', 'retrieve a service diagram for a
         })
     yargs
         .positional('output', {
-            describe : 'Service diagram output format',
+            describe : 'Service diagram output format (json or graphviz)',
             required : true,
             type     : 'string',
             default  : 'graphviz'
         })
+        .positional('diagram-input', {
+            describe : 'Generate diagram from input instead of calling the API',
+            required : false,
+            type     : 'string'
+        })
 }, async (argv) => {
-    const sdkClient = await sdk.init(argv.lightstepOrganization,
-        argv.lightstepApiKey)
-    const diagram = await sdkClient.getServiceDiagram({ project : argv.project, snapshotId : argv.snapshotId})
+    const sdkClient = await sdk.init(argv.lightstepOrganization, argv.lightstepApiKey)
+
+    var diagram
+    if (argv.diagramInput) {
+        diagram = JSON.parse(argv.diagramInput)
+    }
+
+    if (!diagram) {
+        diagram = await sdkClient.getServiceDiagram({ project : argv.project, snapshotId : argv.snapshotId })
+    }
 
     if (argv.output === 'json') {
         console.log(JSON.stringify(diagram, null, 2))

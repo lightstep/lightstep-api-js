@@ -216,7 +216,7 @@ class LightstepAPI {
                 "Authorization" : `Bearer ${this.apiKey}`,
             }
         } )
-        if (response.status !== 200) {
+        if (response.status !== 200 && response.status !== 202) {
             const text = await response.text()
             throw new Error(`HTTP Error ${response.status}: ${text}`)
         }

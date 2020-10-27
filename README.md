@@ -28,8 +28,13 @@ There is a convenience CLI available for interacting with the API.
     # Take a snapshot for a given query
     $ lightstep take-snapshot --project dev-foo 'service in ("frontend")'
 
+    # Experimental integrations below
+
     # Generate a Gremlin chaos attack from a span for service named frontend
     $ lightstep gremlin --project dev-foo --span-id $SPAN_ID frontend
+
+    # Generate PagerDuty service relationships from a snapshot id
+    $ lightstep pagerduty --project dev-foo jT1VWPSc
 ```
 
 ### code examples

@@ -45,7 +45,7 @@ class LightstepAPI {
     }
 
     getApiHostname() {
-        return process.env.LIGHTSTEP_HOST || process.env.LIGHTSTEP_API_HOST || this.defaultHostname
+        return process.env.LIGHTSTEP_HOST || process.env.LIGHTSTEP_API_HOST || this.defaultHostname()
     }
 
     _initConvenienceFunctions() {
@@ -207,9 +207,11 @@ class LightstepAPI {
      * Returns a service diagram from a snapshot id from the API
      */
     async getServiceDiagram({project, snapshotId}) {
+        const hostname = this.getApiHostname()
+        const basePath = this.basePath()
         // eslint-disable-next-line max-len
-        const url = `https://${this.getApiHostname()}${this.basePath()}/${this.orgId}/projects/${project}/snapshots/${snapshotId}/service-diagram`
-        const response = await fetch(url, {
+        const reqUrl = `https://${hostname}${basePath}/${this.orgId}/projects/${project}/snapshots/${snapshotId}/service-diagram`
+        const response = await fetch(reqUrl, {
             method  : 'GET',
             headers : {
                 "Content-Type"  : "application/json",

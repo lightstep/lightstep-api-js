@@ -246,6 +246,52 @@ yargs.command('gremlin <service>', 'generate gremlin attack from trace targeting
     return Promise.resolve()
 })
 
+yargs.command('pagerduty <snapshot-id>', 'update PagerDuty service diagram from a snapshot', (yargs) => {
+    yargs
+        .option('pagerduty-api-token', {
+            describe : 'PagerDuty API token',
+            type     : 'string',
+            required : true,
+            default  : process.env.PAGERDUTY_API_TOKEN
+        })
+        .option('project', {
+            describe : 'Lightstep project id',
+            type     : 'string',
+            required : true,
+            default  : process.env.LIGHTSTEP_PROJECT
+        })
+}, async (argv) => {
+    const sdkClient = await sdk.init(argv.lightstepOrganization,
+        argv.lightstepApiKey)
+    const pagerduty = require('../src/pagerduty')
+    const diagram = await sdkClient.getServiceDiagram({ project : argv.project, snapshotId : argv.snapshotId })
+    const pagerdutyServices = await pagerduty.getPagerdutyServices({ apiToken : argv.pagerdutyApiToken })
+    const pagerdutyRelationships = []
+    const edges = diagram.data.attributes['service-diagram'].edges
+    for (var e in edges) {
+        if (!pagerdutyServices[edges[e].from] ||
+             !pagerdutyServices[edges[e].to]) {
+            continue
+        }
+        pagerdutyRelationships.push({
+            "supporting_service" : {
+                "id"   : pagerdutyServices[edges[e].to].id,
+                "type" : "service"
+            },
+            "dependent_service" : {
+                "id"   : pagerdutyServices[edges[e].from].id,
+                "type" : "service"
+            }
+        })
+    }
+    const deps = await pagerduty.createPagerdutyServiceDeps({
+        relationships : pagerdutyRelationships,
+        apiToken      : argv.pagerdutyApiToken })
+    deps.relationships.forEach(r => {
+        console.log(`Created PagerDuty service relationship ${r.id}...`)
+    })
+    return Promise.resolve()
+})
 
 yargs.option('lightstep-api-key', {
     type        : 'string',

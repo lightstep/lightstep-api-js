@@ -187,7 +187,7 @@ yargs.command('service-diagram <snapshot-id>', 'retrieve a service diagram for a
     }
 
     if (argv.output === 'graphviz') {
-        console.log(sdkClient.diagramToGraphviz(diagram))
+        console.log(sdkClient.diagramToGraphviz(diagram).to_dot())
     }
 
     return Promise.resolve()

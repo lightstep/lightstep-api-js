@@ -241,7 +241,7 @@ class LightstepAPI {
         for (var e in edges) {
             g.addEdge(edges[e].from, edges[e].to)
         }
-        return g.to_dot()
+        return g
     }
 }
 

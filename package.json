@@ -1,6 +1,6 @@
 {
   "name": "lightstep-js-sdk",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Javascript SDK for the public Lighstep API",
   "main": "src/index.js",
   "dependencies": {

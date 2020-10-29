@@ -59,6 +59,8 @@ class LightstepAPI {
             createSnapshot : this.sdk.apis.Snapshots.createSnapshot,
         }
 
+        this.diagramDiff = require('./service-diagram-diff')
+
         for (const s in shortcuts) {
             this[s] = (opts = {}) => {
                 if(!opts.organization) {

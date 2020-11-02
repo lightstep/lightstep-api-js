@@ -4,7 +4,8 @@
 
 const sdk = require('../src/index.js')
 const yargs = require('yargs')
-const { createGremlinLatencyAttack } = require('../src/gremlin')
+const { createGremlinLatencyAttack } = require('../src/integrations/gremlin')
+const pagerduty = require('../src/integrations/pagerduty')
 
 yargs.command('projects', 'get projects', () => {}, async (argv) => {
     const sdkClient = await sdk.init(argv.lightstepOrganization,
@@ -263,7 +264,6 @@ yargs.command('pagerduty <snapshot-id>', 'update PagerDuty service diagram from 
 }, async (argv) => {
     const sdkClient = await sdk.init(argv.lightstepOrganization,
         argv.lightstepApiKey)
-    const pagerduty = require('../src/pagerduty')
     const diagram = await sdkClient.getServiceDiagram({ project : argv.project, snapshotId : argv.snapshotId })
     const pagerdutyServices = await pagerduty.getPagerdutyServices({ apiToken : argv.pagerdutyApiToken })
     const pagerdutyRelationships = []

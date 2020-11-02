@@ -267,5 +267,6 @@ function init(orgId, apiKey) {
 }
 
 module.exports = {
-    init : init
+    init   : init,
+    action : require('./action')
 }

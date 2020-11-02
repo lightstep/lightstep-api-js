@@ -19,7 +19,7 @@ class LightstepConfig {
             const configFile = path.join(configDir, LIGHTSTEP_CONFIG_FILE)
             let fileContents = fs.readFileSync(configFile, 'utf8')
             const yamlConfig = yaml.safeLoadAll(fileContents)
-            this._config = { ...yamlConfig[0], ...{ integrations : {} } }
+            this._config = { ...{ integrations : {}, ...yamlConfig[0], } }
         } catch (e) {
             // ignore
         }

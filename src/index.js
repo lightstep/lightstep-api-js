@@ -267,6 +267,11 @@ function init(orgId, apiKey) {
 }
 
 module.exports = {
-    init   : init,
+    init         : init,
+    integrations : {
+        pagerduty : require('./integrations/pagerduty'),
+        rollbar   : require('./integrations/rollbar'),
+        gremlin   : require('./integrations/gremlin')
+    },
     action : require('./action')
 }

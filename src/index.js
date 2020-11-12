@@ -2,6 +2,7 @@ const Swagger = require('swagger-client')
 const VERSION = require('../package.json').version
 const fetch = require('node-fetch')
 const graphviz = require('graphviz')
+const { diagramDiff, diagramStats, snapshotServiceStats, snapshotDiff } = require('./snapshot-utils')
 
 /**
 * This class provides methods to call the Lightstep Public APs.
@@ -59,7 +60,7 @@ class LightstepAPI {
             createSnapshot : this.sdk.apis.Snapshots.createSnapshot,
         }
 
-        this.diagramDiff = require('./service-diagram-diff')
+        this.utils = { diagramDiff, diagramStats, snapshotServiceStats, snapshotDiff }
 
         for (const s in shortcuts) {
             this[s] = (opts = {}) => {

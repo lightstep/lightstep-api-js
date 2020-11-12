@@ -190,7 +190,7 @@ class LightstepAPI {
      */
     async getSnapshot({project, snapshotId}) {
         // eslint-disable-next-line max-len
-        const url = `https://${this.getApiHostname()}${this.basePath()}/${this.orgId}/projects/${project}/snapshots/${snapshotId}`
+        const url = `https://${this.getApiHostname()}${this.basePath()}/${this.orgId}/projects/${project}/snapshots/${snapshotId}?include-percentiles=1&include-exemplars=1&include-histogram=1`
         const response = await fetch(url, {
             method  : 'GET',
             headers : {

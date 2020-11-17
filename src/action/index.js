@@ -1,0 +1,2 @@
+
+exports.LightstepConfig = require('./config')

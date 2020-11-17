@@ -2,6 +2,7 @@ const Swagger = require('swagger-client')
 const VERSION = require('../package.json').version
 const fetch = require('node-fetch')
 const graphviz = require('graphviz')
+const { diffSummary, snapshotSummary} = require('./snapshot-utils')
 
 /**
 * This class provides methods to call the Lightstep Public APs.
@@ -57,6 +58,10 @@ class LightstepAPI {
             timeseries     : this.sdk.apis.Streams.timeseriesID,
             storedTraces   : this.sdk.apis.Traces.storedTracesID,
             createSnapshot : this.sdk.apis.Snapshots.createSnapshot,
+        }
+
+        this.utils = {
+            diffSummary, snapshotSummary
         }
 
         for (const s in shortcuts) {
@@ -188,7 +193,7 @@ class LightstepAPI {
      */
     async getSnapshot({project, snapshotId}) {
         // eslint-disable-next-line max-len
-        const url = `https://${this.getApiHostname()}${this.basePath()}/${this.orgId}/projects/${project}/snapshots/${snapshotId}`
+        const url = `https://${this.getApiHostname()}${this.basePath()}/${this.orgId}/projects/${project}/snapshots/${snapshotId}?include-percentiles=1&include-exemplars=1&include-histogram=1`
         const response = await fetch(url, {
             method  : 'GET',
             headers : {
@@ -239,7 +244,7 @@ class LightstepAPI {
         for (var e in edges) {
             g.addEdge(edges[e].from, edges[e].to)
         }
-        return g.to_dot()
+        return g
     }
 }
 
@@ -265,5 +270,11 @@ function init(orgId, apiKey) {
 }
 
 module.exports = {
-    init : init
+    init         : init,
+    integrations : {
+        pagerduty : require('./integrations/pagerduty'),
+        rollbar   : require('./integrations/rollbar'),
+        gremlin   : require('./integrations/gremlin')
+    },
+    action : require('./action')
 }

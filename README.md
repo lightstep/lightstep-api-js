@@ -15,6 +15,21 @@ Javascript SDK for the Lightstep Public API.
 
 There is a convenience CLI available for interacting with the API.
 
+First, install the CLI using npm. You'll need to tell npm to use Lightstep's GitHub-based npm repository:
+
+```sh
+  $ npm_config_registry=https://npm.pkg.github.com/lightstep npm install -g @lightstep/lightstep-api-js
+  $ lightstep --help # see different options
+```
+
+You'll also need to set a Lightstep API key:
+
+```sh
+  $ export LIGHTSTEP_API_KEY=<<your key>>
+```
+
+Examples:
+
 ```sh
     # Get services for a project
     $ lightstep services --project dev-foo

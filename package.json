@@ -1,7 +1,7 @@
 {
-  "name": "lightstep-js-sdk",
+  "name": "@lightstep/lightstep-api-js",
   "version": "0.1.0",
-  "description": "Javascript SDK for the public Lighstep API",
+  "description": "Javascript SDK for the Lightstep API",
   "main": "src/index.js",
   "dependencies": {
     "graphviz": "0.0.9",
@@ -22,14 +22,15 @@
     "e2e": "./node_modules/.bin/jest --testRegex='./e2e/e2e.js'",
     "lint": "eslint src"
   },
+  "publishConfig": { "registry": "https://npm.pkg.github.com/" },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lightstep/lightstep-js-sdk.git"
+    "url": "git+https://github.com/lightstep/lightstep-api-js.git"
   },
-  "author": "Lighstep, Inc.",
+  "author": "Lightstep, Inc.",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/lightstep/lightstep-js-sdk/issues"
+    "url": "https://github.com/lightstep/lightstep-api-js/issues"
   },
-  "homepage": "https://github.com/lightstep/lightstep-js-sdk#readme"
+  "homepage": "https://github.com/lightstep/lightstep-api-js#readme"
 }

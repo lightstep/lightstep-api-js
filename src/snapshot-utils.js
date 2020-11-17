@@ -18,23 +18,6 @@ const difference = (d1, d2) => {
     return d2.filter(d => !d1.includes(d))
 }
 
-const criticalPathDiff = (beforeDiagram, afterDiagram) => {
-    const comparisonNodes = intersection(getNodes(beforeDiagram), getNodes(afterDiagram))
-    const criticalPathDiff = {}
-    for (var n of comparisonNodes) {
-        const latencyBefore = getCriticalPathLatency(beforeDiagram, n)
-        const latencyAfter = getCriticalPathLatency(afterDiagram, n)
-        if (!isNaN(latencyBefore) && !isNaN(latencyAfter)) {
-            const diff = latencyAfter-latencyBefore
-            const pct = ((diff/latencyBefore)*100).toFixed(2)
-            criticalPathDiff[n] = {
-                diff, pct
-            }
-        }
-    }
-    return criticalPathDiff
-}
-
 /**
  * Groups a Snapshot API response by service name and calculates
  * average error percentage and average duration (ms).
@@ -88,16 +71,12 @@ const diagramStats = (diagram) => {
  *
  * @param {} snapshot
  */
-const diagramDiff = (beforeDiagram, afterDiagram) => {
-    const before = diagramStats(beforeDiagram)
-    const after = diagramStats(afterDiagram)
-
+const diagramDiff = (before, after) => {
     return {
         added_services      : difference(before.nodes, after.nodes),
         deleted_services    : difference(after.nodes, before.nodes),
         added_connections   : difference(before.edges, after.edges),
         deleted_connections : difference(after.edges, before.edges),
-        latency             : criticalPathDiff(beforeDiagram, afterDiagram)
     }
 }
 
@@ -105,9 +84,7 @@ const diagramDiff = (beforeDiagram, afterDiagram) => {
  * Calculates average latency and error percent difference
  * between two snapshot API responses.
  */
-const snapshotDiff = (beforeSnapshot, afterSnapshot) => {
-    const beforeStats = snapshotServiceStats(beforeSnapshot)
-    const afterStats = snapshotServiceStats(afterSnapshot)
+const snapshotDiff = (beforeStats, afterStats) => {
 
     const avgDurationMs = Object.keys(afterStats).reduce((obj, s) => {
         const diff = (afterStats[s].avgDurationMs - beforeStats[s].avgDurationMs)
@@ -160,4 +137,39 @@ const snapshotDiff = (beforeSnapshot, afterSnapshot) => {
     return { avgDurationMs, errorPct }
 }
 
-module.exports = { diagramStats, diagramDiff, snapshotServiceStats, snapshotDiff }
+const diffSummary = (beforeId, snapshotBeforeSummary, afterId, snapshotAfterSummary) => {
+    return {
+        [`${beforeId}_${afterId}`] : {
+            snapshot : snapshotDiff(snapshotBeforeSummary.snapshot, snapshotAfterSummary.snapshot),
+            diagram  : diagramDiff(snapshotBeforeSummary.diagram, snapshotAfterSummary.diagram)
+        }
+    }
+}
+
+const snapshotSummary = (snapshotApiResponse, diagramApiResponse) => {
+    if (snapshotApiResponse.data.id !== diagramApiResponse.data.id) {
+        return {}
+    }
+
+    const services = snapshotServiceStats(snapshotApiResponse)
+    const diagram = diagramStats(diagramApiResponse)
+
+    Object.keys(services).forEach((s) => {
+        for (var n of diagram.edges) {
+            const connection = n.split('>')
+            if (s === connection[0]) {
+                services[s].dependencies = services[s].dependencies || {}
+                services[s].dependencies[connection[1]] = true
+            }
+        }
+    })
+
+    return {
+        [snapshotApiResponse.data.id] : {
+            snapshot : services,
+            diagram  : diagram
+        }
+    }
+}
+
+module.exports = { snapshotSummary, diffSummary }

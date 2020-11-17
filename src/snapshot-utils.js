@@ -6,10 +6,6 @@ const getEdges = (serviceDiagram) => {
     return Object.keys(serviceDiagram.data.attributes['service-diagram'].edges)
 }
 
-const getCriticalPathLatency = (serviceDiagram, node) => {
-    return serviceDiagram.data.attributes['service-diagram'].overlays.nodes[node].average_critical_path_latency_micros
-}
-
 const intersection = (d1, d2) => {
     return d2.filter(d => d1.includes(d))
 }
@@ -86,7 +82,7 @@ const diagramDiff = (before, after) => {
  */
 const snapshotDiff = (beforeStats, afterStats) => {
 
-    const avgDurationMs = Object.keys(afterStats).reduce((obj, s) => {
+    const avgDurationMsByService = Object.keys(afterStats).reduce((obj, s) => {
         const diff = (afterStats[s].avgDurationMs - beforeStats[s].avgDurationMs)
 
         // avg duration change by operation
@@ -104,16 +100,16 @@ const snapshotDiff = (beforeStats, afterStats) => {
         const deleted_operations = difference(beforeStats[s].operationNames, afterStats[s].operationNames)
         const added_operations = difference(afterStats[s].operationNames, beforeStats[s].operationNames)
 
-        obj[s] = {
+        obj[s] =  { avgDurationMs : {
             operations,
             diff,
             added_operations,
             deleted_operations,
             pct : (diff/beforeStats[s].avgDurationMs)
-        }
+        } }
         return obj
     }, {})
-    const errorPct = Object.keys(afterStats).reduce((obj, s) => {
+    const errorPctByService = Object.keys(afterStats).reduce((obj, s) => {
         const diff = (afterStats[s].errorPct - beforeStats[s].errorPct)
 
         // error change by operation
@@ -127,16 +123,32 @@ const snapshotDiff = (beforeStats, afterStats) => {
             obj[o] = { diff, pct : diff }
             return obj
         }, {})
-        obj[s] = {
+        obj[s] = { errorPct : {
             operations,
             diff,
             pct : diff
+        } }
+        return obj
+    }, {})
+
+    return Object.keys(afterStats).reduce((obj, s) => {
+        obj[s] = {
+            errorPct      : errorPctByService[s].errorPct,
+            avgDurationMs : avgDurationMsByService[s].avgDurationMs,
         }
         return obj
     }, {})
-    return { avgDurationMs, errorPct }
 }
 
+/**
+ * Calcuates difference between two snapshots' snapshots and service diagrams
+ * from the responses from `snapshotSummary`.
+ *
+ * @param {*} beforeId
+ * @param {*} snapshotBeforeSummary
+ * @param {*} afterId
+ * @param {*} snapshotAfterSummary
+ */
 const diffSummary = (beforeId, snapshotBeforeSummary, afterId, snapshotAfterSummary) => {
     return {
         [`${beforeId}_${afterId}`] : {
@@ -146,6 +158,15 @@ const diffSummary = (beforeId, snapshotBeforeSummary, afterId, snapshotAfterSumm
     }
 }
 
+/**
+ * Consolidated summary (grouped by service) for a snapshots and snapshot 
+ * service diagram from the API responses.
+ *
+ * @param {*} beforeId
+ * @param {*} snapshotBeforeSummary
+ * @param {*} afterId
+ * @param {*} snapshotAfterSummary
+ */
 const snapshotSummary = (snapshotApiResponse, diagramApiResponse) => {
     if (snapshotApiResponse.data.id !== diagramApiResponse.data.id) {
         return {}

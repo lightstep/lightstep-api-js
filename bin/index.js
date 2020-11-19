@@ -134,6 +134,22 @@ yargs.command('take-snapshot <query>', 'take a snapshot for a query', (yargs) =>
     return Promise.resolve()
 })
 
+yargs.command('snapshots', 'list snapshots', (yargs) => {
+    yargs
+        .positional('project', {
+            describe : 'Lightstep project id',
+            required : true,
+            type     : 'string',
+            default  : process.env.LIGHTSTEP_PROJECT
+        })
+}, async (argv) => {
+    const sdkClient = await sdk.init(argv.lightstepOrganization,
+        argv.lightstepApiKey)
+    const snapshots = await sdkClient.getSnapshots({ project : argv.project })
+    console.log(JSON.stringify(snapshots, null, 2))
+    return Promise.resolve()
+})
+
 yargs.command('snapshot <id>', 'retrieve a snapshot for a query', (yargs) => {
     yargs
         .positional('project', {

@@ -159,7 +159,7 @@ const diffSummary = (beforeId, snapshotBeforeSummary, afterId, snapshotAfterSumm
 }
 
 /**
- * Consolidated summary (grouped by service) for a snapshots and snapshot 
+ * Consolidated summary (grouped by service) for a snapshots and snapshot
  * service diagram from the API responses.
  *
  * @param {*} beforeId

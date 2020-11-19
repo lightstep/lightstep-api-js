@@ -209,6 +209,26 @@ class LightstepAPI {
     }
 
     /**
+     * Returns a snapshot from the API
+     */
+    async getSnapshots({project}) {
+        // eslint-disable-next-line max-len
+        const url = `https://${this.getApiHostname()}${this.basePath()}/${this.orgId}/projects/${project}/snapshots`
+        const response = await fetch(url, {
+            method  : 'GET',
+            headers : {
+                "Content-Type"  : "application/json",
+                "Authorization" : `Bearer ${this.apiKey}`,
+            }
+        } )
+        if (response.status !== 200) {
+            const text = await response.text()
+            throw new Error(`HTTP Error ${response.status}: ${text}`)
+        }
+        return await response.json()
+    }
+
+    /**
      * Returns a service diagram from a snapshot id from the API
      */
     async getServiceDiagram({project, snapshotId}) {

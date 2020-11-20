@@ -1,6 +1,6 @@
 {
   "name": "@lightstep/lightstep-api-js",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Javascript SDK for the Lightstep API",
   "main": "src/index.js",
   "dependencies": {

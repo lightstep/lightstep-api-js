@@ -83,6 +83,9 @@ const diagramDiff = (before, after) => {
 const snapshotDiff = (beforeStats, afterStats) => {
 
     const avgDurationMsByService = Object.keys(afterStats).reduce((obj, s) => {
+        if (!afterStats[s] || !beforeStats[s]) {
+            return obj
+        }
         const diff = (afterStats[s].avgDurationMs - beforeStats[s].avgDurationMs)
 
         // avg duration change by operation
@@ -110,6 +113,9 @@ const snapshotDiff = (beforeStats, afterStats) => {
         return obj
     }, {})
     const errorPctByService = Object.keys(afterStats).reduce((obj, s) => {
+        if (!afterStats[s] || !beforeStats[s]) {
+            return obj
+        }
         const diff = (afterStats[s].errorPct - beforeStats[s].errorPct)
 
         // error change by operation
@@ -132,6 +138,9 @@ const snapshotDiff = (beforeStats, afterStats) => {
     }, {})
 
     return Object.keys(afterStats).reduce((obj, s) => {
+        if (!errorPctByService[s] || !avgDurationMsByService[s]) {
+            return obj
+        }
         obj[s] = {
             errorPct      : errorPctByService[s].errorPct,
             avgDurationMs : avgDurationMsByService[s].avgDurationMs,

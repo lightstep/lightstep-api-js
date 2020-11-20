@@ -1,9 +1,19 @@
 const getNodes = (serviceDiagram) => {
-    return Object.keys(serviceDiagram.data.attributes['service-diagram'].nodes)
+    if (serviceDiagram.data
+        && serviceDiagram.data.attributes
+        && serviceDiagram.data.attributes['service-diagram']) {
+        return Object.keys(serviceDiagram.data.attributes['service-diagram'].nodes)
+    }
+    return []
 }
 
 const getEdges = (serviceDiagram) => {
-    return Object.keys(serviceDiagram.data.attributes['service-diagram'].edges)
+    if (serviceDiagram.data
+        && serviceDiagram.data.attributes
+        && serviceDiagram.data.attributes['service-diagram']) {
+        return Object.keys(serviceDiagram.data.attributes['service-diagram'].edges)
+    }
+    return []
 }
 
 const intersection = (d1, d2) => {

@@ -25,13 +25,26 @@ yargs.command('services', 'get services', (yargs) => {
             type     : 'string',
             default  : process.env.LIGHTSTEP_PROJECT
         })
+        .positional('output', {
+            describe : 'Service listing output format (json or graphviz)',
+            required : true,
+            type     : 'string',
+            default  : 'text'
+        })
 }, async (argv) => {
     const sdkClient = await sdk.init(argv.lightstepOrganization,
         argv.lightstepApiKey)
 
     const services = await sdkClient.listServices({ project : argv.project })
+    if (argv.output === 'csv') {
+        console.log('service,last_seen')
+    }
     for (const service of services.body.data.items) {
-        console.log(`${service.attributes.name}`)
+        if (argv.output === 'csv') {
+            console.log(`${service.attributes.name},${service.attributes.last_seen}`)
+        } else {
+            console.log(`${service.attributes.name}`)
+        }
     }
     return Promise.resolve()
 })
